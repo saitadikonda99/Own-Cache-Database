@@ -6,7 +6,7 @@ const net = require('net');
 const fs = require('fs');
 const { encodeRESP, parseRESP } = require('./lib/parser/respParser');
 
-const DEFAULT_HOST = '127.0.0.1'
+const DEFAULT_HOST = '0.0.0.0'
 const DEFAULT_PORT = 8000
 
 const host = process.env.HOST || DEFAULT_HOST

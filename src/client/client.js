@@ -5,7 +5,7 @@ const parseCommand = require('../lib/parser/commandParser');
 const readline = require('readline');
 
 const DEFAULT_PORT = 8000;
-const DEFAULT_HOST = '127.0.0.1';
+const DEFAULT_HOST = process.env.NODE_ENV === 'production' ? 'cache-server' : '127.0.0.1';
 
 const client = new net.Socket();
 let buffer = Buffer.alloc(0);
