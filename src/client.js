@@ -78,6 +78,11 @@ const startREPL = () => {
             return;
         }
 
+        if (command === '' || command === '\n' || command.length === 0) {
+            rl.prompt();
+            return;
+        }
+
         const args = parseCommand(command);
         const data = encodeRESP(args);
 
