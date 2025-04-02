@@ -1,8 +1,10 @@
-// This file is the entry point for the server
+/*
+    - The server listens on a TCP port for incoming connections.
+*/
 
 const net = require('net');
 const fs = require('fs');
-const { encodeRESP, parseRESP } = require('./resp-parser');
+const { encodeRESP, parseRESP } = require('./lib/parser/respParser');
 
 const DEFAULT_HOST = '127.0.0.1'
 const DEFAULT_PORT = 8000

@@ -1,8 +1,8 @@
 const net = require('net');
+const { encodeRESP, parseRESP } = require('../lib/parser/respParser');
+const displayResponse = require('../lib/display/responseFormatter');
+const parseCommand = require('../lib/parser/commandParser');
 const readline = require('readline');
-const { encodeRESP, parseRESP } = require('./resp-parser');
-const parseCommand = require('./commandParser');
-const displayResponse = require('./displayResponse');
 
 const DEFAULT_PORT = 8000;
 const DEFAULT_HOST = '127.0.0.1';
@@ -45,14 +45,6 @@ client.on('error', (err) => {
     }
     process.exit(1);
 });
-
-/*
-    # Read-Eval-Print Loop
-        - Reads user input
-        - Evaluates the input
-        - Prints the result
-        - Loops back to wait for more input
-*/
 
 const startREPL = () => {
 
