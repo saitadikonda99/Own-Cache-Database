@@ -38,10 +38,29 @@ const commandHandlers = {
         }
     },
 
-    KEYS: () => {
-
+    KEYS: (socket, args) => {
+        const pattern = args[0];
+        if (!pattern) {
+            return socket.write(encodeRESP({ type: 'error', value: 'ERR wrong number of arguments for \'KEYS\' command' }));
+        }
+    
+        let matchedKeys;
+    
+        if (pattern === '*') {
+            matchedKeys = Object.keys(store);
+        } else {
+            // Basic pattern matching: treating * as wildcard
+            const regex = new RegExp('^' + pattern.replace(/\*/g, '.*') + '$');
+            matchedKeys = Object.keys(store).filter(key => regex.test(key));
+        }
+    
+        if (matchedKeys.length === 0) {
+            return socket.write(encodeRESP([]));
+        }
+    
+        socket.write(encodeRESP(matchedKeys));
     },
-
+    
     TTL: (socket, args) => {
         const key = args[0];
 
@@ -54,8 +73,16 @@ const commandHandlers = {
         }
     },
 
-    TYPE: () => {
+    TYPE: (socket, args) => {
+        const key = args[0];
 
+        if (key in store) {
+            const type = typeof store[key];
+            socket.write(encodeRESP(type));
+        }
+        else {
+            socket.write(encodeRESP('none'));
+        }
     },
 
     PERSIST: (socket, args) => {
@@ -98,19 +125,61 @@ const commandHandlers = {
     GET: (socket, args) => {
         const key = args[0];
         const value = store[key];
-        socket.write(encodeRESP(value === undefined ? null : value));
+        socket.write(encodeRESP(value === undefined ? "(nil)" : value));
     },
 
-    APPEND: () => {
+    APPEND: (socket, args) => {
+        const key = args[0];
+        const value = args[1];
 
+        if (!key || !value) {
+            return socket.write(encodeRESP({ type: 'error', value: 'ERR wrong number of arguments for \'APPEND\' command' }));
+        }
+
+        const currentValue = store[key] || '';
+        store[key] = currentValue + value;
+        socket.write(encodeRESP(store[key].length));
     },
 
-    INCR: () => {
+    INCR: (socket, args) => {
+        const key = args[0];
 
+        if (!key) {
+            return socket.write(encodeRESP({ type: 'error', value: 'ERR wrong number of arguments for \'INCR\' command' }));
+        }
+
+        if (key in store) {
+            const currentValue = parseInt(store[key]);
+            if (isNaN(currentValue)) {
+                return socket.write(encodeRESP({ type: 'error', value: 'ERR value is not an integer or out of range' }));
+            }
+            store[key] = currentValue + 1;
+        }
+        else {
+            store[key] = 1;
+        }
+
+        socket.write(encodeRESP(store[key]));
     },
 
-    DECR: () => {
+    DECR: (socket, args) => {
+        const key = args[0];
 
+        if (!key) {
+            return socket.write(encodeRESP({ type: 'error', value: 'ERR wrong number of arguments for \'DECR\' command' }));
+        }
+
+        if (key in store) {
+            const currentValue = parseInt(store[key]);
+            if (isNaN(currentValue)) {
+                return socket.write(encodeRESP({ type: 'error', value: 'ERR value is not an integer or out of range' }));
+            }
+            store[key] = currentValue - 1;
+        }
+        else {
+            store[key] = 0;
+        }
+        socket.write(encodeRESP(store[key]));
     },
 }
 
