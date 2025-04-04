@@ -5,6 +5,8 @@
 const net = require('net');
 const fs = require('fs');
 const { encodeRESP, parseRESP } = require('./lib/parser/respParser');
+const commandHandlers = require('./command/commandHandlers');
+const { store, ttl } = require('./lib/storage/store');
 
 const DEFAULT_HOST = '0.0.0.0'
 const DEFAULT_PORT = 8000
@@ -13,8 +15,6 @@ const host = process.env.HOST || DEFAULT_HOST
 const port = process.env.PORT || DEFAULT_PORT
 
 const DB_FILE = 'db.json';
-
-const store = {};
 
 const loadFromDisk = () => {
     if (fs.existsSync(DB_FILE)) {
@@ -29,14 +29,12 @@ const loadFromDisk = () => {
 }
 
 const saveToDisk = () => {
-    const data = JSON.stringify({ store });
-    fs.writeFile(DB_FILE, data, (err) => {
-        if (err) {
-            console.error('Error saving to disk:', err);
-        } else {
-            console.log('Data saved to disk.');
-        }
-    });
+    try {
+        fs.writeFileSync(DB_FILE, JSON.stringify({ store }, null, 2));
+        console.log('Data saved to disk.');
+    } catch (err) {
+        console.error('Error saving database:', err);
+    }
 };
 
 
@@ -72,58 +70,22 @@ const server = net.createServer((socket) => {
 });
 
 const handleCommand = (socket, command) => {
-
     if (!Array.isArray(command) || command.length === 0) {
         socket.write(encodeRESP({ type: 'error', value: 'Invalid command' }));
+        return;
     }
 
     const cmd = command[0].toUpperCase();
-    const key = command[1];
-    const value = command[2];
+    const args = command.slice(1); 
 
-    console.log('Command:', cmd);
-    switch (cmd) {
-        case 'PING':
-            socket.write(encodeRESP({ type: 'simple', value: 'PONG' }));
-            break;
+    console.log(`Command: ${cmd}, Args:`, args);
 
-        case 'SET':
-            if (!key || !value) {
-                socket.write(encodeRESP({ type: 'error', value: 'Usage: SET key value' }));
-            } 
-            else {
-                store[key] = value;
-                saveToDisk();
-                socket.write(encodeRESP({ type: 'simple', value: 'OK' }));
-            }
-            break;
+    const handler = commandHandlers[cmd];
 
-        case 'GET':
-            if (!key) {
-                socket.write(encodeRESP({ type: 'error', value: 'Usage: GET key' }));
-            } 
-            else {
-                const result = store[key];
-                if (result === undefined) {
-                    socket.write(encodeRESP({ type: 'simple', value: '(nil)' }));
-                } else {
-                    socket.write(encodeRESP({ type: 'simple', value: result }));
-                }
-            }
-            break;
-        case 'DEL':
-            if (!key) {
-                socket.write(encodeRESP({ type: 'error', value: 'Usage: DEL key' }));
-            } 
-            else {
-                delete store[key];
-                saveToDisk();
-                socket.write(encodeRESP({ type: 'simple', value: 'OK' }));
-            }
-            break
-
-        default:
-            socket.write(encodeRESP({ type: 'error', value: 'Unknown command' }));
+    if (handler) {
+        handler(socket, args);
+    } else {
+        socket.write(encodeRESP({ type: 'error', value: 'Unknown command' }));
     }
 }
 

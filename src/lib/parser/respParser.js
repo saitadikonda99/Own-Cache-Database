@@ -95,6 +95,7 @@ const parseRESP = (buffer, offset = 0) => {
                 return [null, offset - 1];
             }
             const value = buffer.toString('utf8', offset, endIndex);
+            console.error('Error: --->', value);
             return [{ type: 'error', value }, endIndex + 2];
         }
 
