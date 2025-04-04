@@ -7,6 +7,8 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
+db.json
+
 # Ignore environment variables
 .env
 .env.local
