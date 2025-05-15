@@ -4,15 +4,17 @@
 
 const net = require('net');
 const fs = require('fs');
+const dotenv = require('dotenv');
+dotenv.config();
 const { encodeRESP, parseRESP } = require('./lib/parser/respParser');
 const commandHandlers = require('./command/commandHandlers');
 const { store, ttl } = require('./lib/storage/store');
 
-const DEFAULT_HOST = '0.0.0.0'
-const DEFAULT_PORT = 8000
+const DEFAULT_HOST = '0.0.0.0';
+const DEFAULT_PORT = 6379;
 
-const host = process.env.HOST || DEFAULT_HOST
-const port = process.env.PORT || DEFAULT_PORT
+const host = process.env.HOST || DEFAULT_HOST;
+const port = process.env.PORT || DEFAULT_PORT;
 
 const DB_FILE = 'db.json';
 
@@ -82,12 +84,15 @@ const handleCommand = (socket, command) => {
 
     const handler = commandHandlers[cmd];
 
+
     if (handler) {
+
         handler(socket, args);
     } else {
         socket.write(encodeRESP({ type: 'error', value: 'Unknown command' }));
     }
 }
+
 
 loadFromDisk();
 

@@ -4,8 +4,8 @@ const displayResponse = require('../lib/display/responseFormatter');
 const parseCommand = require('../lib/parser/commandParser');
 const readline = require('readline');
 
-const DEFAULT_PORT = 8000;
-const DEFAULT_HOST = process.env.NODE_ENV === 'production' ? 'cache-server' : '127.0.0.1';
+const DEFAULT_PORT = 6379;
+const DEFAULT_HOST = 'cache-server'; 
 
 const client = new net.Socket();
 let buffer = Buffer.alloc(0);
@@ -15,6 +15,7 @@ const host = process.env.HOST || DEFAULT_HOST;
 
 let rl = null;
 
+// Connect to the server
 client.connect(port, host, () => {
     console.log('Connected to server on port:', port);
     startREPL();
@@ -29,7 +30,7 @@ client.on('data', (data) => {
     buffer = buffer.subarray(newOffset);
     displayResponse(response);
     rl.prompt();
-})
+});
 
 client.on('close', () => {
     console.log('Connection closed');
@@ -47,7 +48,6 @@ client.on('error', (err) => {
 });
 
 const startREPL = () => {
-
     rl = readline.createInterface({
         input: process.stdin,
         output: process.stdout,

@@ -63,13 +63,18 @@ const commandHandlers = {
     
     TTL: (socket, args) => {
         const key = args[0];
-
+        
+        if (!(key in store)) {
+            socket.write(encodeRESP(-2)); // Key does not exist
+            return;
+        }
+        
         if (key in ttl) {
             const remainingTTL = ttl[key] - Date.now();
             socket.write(encodeRESP(parseInt(Math.floor(remainingTTL / 1000))));
         }
         else {
-            socket.write(encodeRESP('(integer) -1'));
+            socket.write(encodeRESP(-1)); // Key exists but has no associated expiry
         }
     },
 

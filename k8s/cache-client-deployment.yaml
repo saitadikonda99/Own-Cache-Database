@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cache-client
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cache-client
+  template:
+    metadata:
+      labels:
+        app: cache-client
+    spec:
+      containers:
+      - name: cache-client
+        image: saitadikonda99/cache-client:1.0
+        command: ["node", "src/client/client.js"]
+        env:
+        - name: NODE_ENV
+          value: "production"
+        - name: HOST
+          value: "cache-server"
+        - name: PORT
+          value: "6379"
+        stdin: true
+        tty: true
