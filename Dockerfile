@@ -13,6 +13,6 @@ COPY . .
 
 # Expose the Redis-like server port (if applicable)
 EXPOSE 6379
-
 # Default command
 CMD ["node", "src/server.js"]
+
