@@ -4,7 +4,7 @@ A simple, lightweight in-memory cache database inspired by Redis. This project s
 
 ## Features
 
-- Supports basic commands: `PING`, `SET`, `GET`, `DEL`
+- Supports basic commands: `PING`, `SET`, `GET`, `DEL`, `EXISTS`, `EXPIRE`, `TTL`, `TYPE`, `PERSIST`, `APPEND`, `INCR`, `DECR`, `KEYS`
 - RESP protocol-based communication
 - Data persistence using JSON file storage
 - TCP server for handling client connections
@@ -44,12 +44,21 @@ node src/server.js
 
 ### Commands Supported
 
-| Command       | Description                         | Example                 |
-|--------------|---------------------------------|-------------------------|
-| `PING`       | Check if the server is alive    | `PING` → `PONG`        |
-| `SET key val` | Store a key-value pair         | `SET name Alice` → `OK` |
-| `GET key`     | Retrieve the value of a key    | `GET name` → `Alice`   |
-| `DEL key`     | Delete a key from the store    | `DEL name` → `OK`      |
+| Command            | Description                            | Example                             |
+|-------------------|----------------------------------------|-------------------------------------|
+| `PING`            | Check if the server is alive           | `PING` → `PONG`                     |
+| `SET key val`     | Store a key-value pair                 | `SET name Alice` → `OK`             |
+| `GET key`         | Retrieve the value of a key            | `GET name` → `Alice`                |
+| `DEL key`         | Delete a key from the store            | `DEL name` → `(integer) 1`          |
+| `EXISTS key`      | Check if a key exists                  | `EXISTS name` → `1` or `0`          |
+| `EXPIRE key sec`  | Set key expiration in seconds          | `EXPIRE name 60` → `1`              |
+| `TTL key`         | Get remaining time-to-live for a key   | `TTL name` → `59`                   |
+| `TYPE key`        | Get data type of key                   | `TYPE name` → `string`              |
+| `PERSIST key`     | Remove expiration from a key           | `PERSIST name` → `1`                |
+| `APPEND key val`  | Append value to existing string key    | `APPEND name Bob` → `10`            |
+| `INCR key`        | Increment value of a key               | `INCR counter` → `1`, `2`, ...      |
+| `DECR key`        | Decrement value of a key               | `DECR counter` → `0`, `-1`, ...     |
+| `KEYS pattern`    | Return keys matching pattern           | `KEYS *` → `name`, `counter`, etc.  |
 
 ### Testing with `netcat`
 You can use `netcat` to test commands:
@@ -84,23 +93,27 @@ echo -e "*2\r\n$4\r\nPING\r\n" | nc localhost 8000
 
 ```
 Own-Cache-Database/
-├── docker-compose.yml   # Docker Compose configuration (remove `version` field if present)
-├── Dockerfile           # Dockerfile for containerization
-├── LICENSE              # License information
-├── package-lock.json    # Dependency lock file
-├── package.json         # Project dependencies
-├── README.md            # Project documentation
+├── db.json                  # Data persistence file
+├── docker-compose.yml       # Docker Compose configuration
+├── Dockerfile               # Dockerfile for containerization
+├── LICENSE                  # License information
+├── package-lock.json        # Dependency lock file
+├── package.json             # Project dependencies
+├── README.md                # Project documentation
 └── src
     ├── client
-    │   └── client.js     # Client implementation
+    │   └── client.js         # Client implementation
+    ├── command
+    │   └── commandHandlers.js# Command handling logic
     ├── lib
     │   ├── display
     │   │   └── responseFormatter.js  # Response formatting logic
     │   ├── parser
     │   │   ├── commandParser.js      # Command parsing logic
     │   │   └── respParser.js         # RESP protocol parser
-    │   └── storage                   # Future storage handling
-    └── server.js           # TCP server implementation
+    │   └── storage
+    │       └── store.js              # In-memory store with TTL support
+    └── server.js            # TCP server implementation
 ```
 
 ## Contributing
