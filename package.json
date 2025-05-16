@@ -22,6 +22,8 @@
   "homepage": "https://github.com/saitadikonda99/Own-Cache-Database#readme",
   "dependencies": {
     "dotenv": "^16.4.7",
-    "nodemon": "^3.1.9"
+    "express": "^5.1.0",
+    "nodemon": "^3.1.9",
+    "prom-client": "^15.1.3"
   }
 }

@@ -17,3 +17,7 @@ spec:
         image: saitadikonda99/cache-server:1.0
         ports:
         - containerPort: 6379
+          name: redis
+        - containerPort: 9000
+          name: metrics
+          

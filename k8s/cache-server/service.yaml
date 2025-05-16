@@ -9,4 +9,9 @@ spec:
     - protocol: TCP
       port: 6379
       targetPort: 6379
+      name: redis
+    - protocol: TCP
+      port: 9000
+      targetPort: 9000
+      name: metrics
   type: ClusterIP
